@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Darkened Theater Studios</title>
+<meta name="description" content="Members only.">
+<meta name="theme-color" content="#0c0c0c">
+<link rel="icon" type="image/png" href="door-icon.png">
+<link rel="apple-touch-icon" href="door-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Darkened Theater Studios">
+<meta property="og:description" content="Members only.">
+<meta property="og:image" content="https://ericdts.github.io/darkened-theater-door/door-share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>html,body{margin:0;background:#0c0c0c}</style>
+</head>
+<body>
+<!-- DARKENED THEATER · the door. Paste into one Squarespace Code Block. Change the passwords in the Door Passwords editor, never here. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* one black room, laid over whatever the template draws */
+#dts {
+  --ink: #0c0c0c; --paper: #e3e3e0; --dim: #6c6c69;
+  --display: "Barlow Condensed", "DIN Condensed", "Arial Narrow", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --dw: min(150px, 34vw); --dh: calc(var(--dw) * 2.1);
+  --ease: cubic-bezier(.65, 0, .35, 1);
+  position: fixed; inset: 0; z-index: 99999; overflow-y: auto; overflow-x: hidden;
+  background: var(--ink); color: var(--paper); font-family: var(--display);
+  display: grid; grid-template-rows: auto 1fr auto; color-scheme: dark;
+  padding: env(safe-area-inset-top, 0px) max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+#dts * { box-sizing: border-box; }
+#dts button, #dts input { font: inherit; color: inherit; }
+#dts :focus-visible { outline: 1px solid var(--paper); outline-offset: 5px; }
+#dts .meta { padding-block: 22px; display: flex; justify-content: space-between; gap: 12px; font: 400 10px/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
+#dts .meta b { font-weight: 400; color: var(--paper); font-variant-numeric: tabular-nums; }
+#dts .center { overflow-x: clip; display: grid; justify-items: center; align-content: center; padding-top: 12px; }
+
+/* the door: a plain rectangle, ajar on its left edge */
+#dts .door-wrap { position: relative; }
+#dts .door { position: relative; display: block; width: var(--dw); height: var(--dh); background: none; border: 0; padding: 0; margin: 0; cursor: pointer; }
+#dts .gap { position: absolute; top: 0; left: 0; height: 100%; width: var(--open, 0px); overflow: hidden; background: var(--paper); transition: width 1.3s var(--ease); }
+#dts .leaf { position: absolute; top: 0; bottom: 0; right: 0; left: var(--open, 0px); background: linear-gradient(90deg, #131313, #0e0e0e 50%); transition: left 1.3s var(--ease); }
+#dts .frame { position: absolute; inset: -1px -1px 0 -1px; border: 1px solid #1f1f1e; border-bottom: 0; pointer-events: none; }
+
+/* the name on the floor, readable only where the light lands */
+#dts .pool { width: var(--dw); height: 120px; position: relative; pointer-events: none; }
+#dts .pool > * { position: absolute; top: 0; left: 0; }
+#dts .light, #dts .lit { clip-path: polygon(0 0, var(--open, 0px) 0, calc(var(--open, 0px) * 8 + 16px) 100%, 0 100%); transition: clip-path 1.3s var(--ease); }
+#dts .light { height: 100%; width: 600px; background: linear-gradient(180deg, rgba(227,227,224,.30), rgba(227,227,224,0)); }
+#dts .name { height: 100%; width: 600px; margin: 0; padding: 62px 0 0 4px; font: 500 16px/1 var(--display); letter-spacing: .55em; text-transform: uppercase; white-space: nowrap; color: var(--paper); }
+#dts .name.dim { opacity: .05; }
+#dts .lit span { transition: opacity .5s var(--ease); transition-delay: calc(var(--i) * 140ms); }
+#dts.out .lit span { opacity: 0; }
+
+/* door states */
+#dts.ajar { --open: 7px; }
+#dts.ajar.peek { --open: 64px; }
+#dts.ajar.shut { --open: 0px; }
+#dts.slam .gap, #dts.slam .leaf, #dts.slam .light, #dts.slam .lit { transition-duration: .18s; transition-timing-function: cubic-bezier(.7, 0, 1, 1); }
+
+/* the knock */
+#dts .knockzone { padding-block: 28px calc(28px + env(safe-area-inset-bottom, 0px)); display: grid; justify-items: center; gap: 12px; min-height: 120px; opacity: 0; transition: opacity 1s var(--ease) .3s; }
+#dts.titled .knockzone { opacity: 1; }
+#dts .knock { background: none; border: 0; border-bottom: 1px solid var(--dim); padding: 6px 2px; margin-right: -.5em; cursor: pointer; font: 500 14px/1 var(--display); letter-spacing: .5em; text-transform: uppercase; }
+#dts .knock:hover { border-color: var(--paper); }
+#dts .code { background: transparent; border: 0; border-bottom: 1px solid var(--dim); border-radius: 0; padding: 8px 0; width: 220px; max-width: 70vw; text-align: center; font: 500 18px/1 var(--display); letter-spacing: .5em; text-transform: uppercase; }
+#dts .code:focus { outline: none; border-color: var(--paper); }
+#dts .code::placeholder { color: var(--dim); }
+#dts .reply { font: 400 11px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); min-height: 1.4em; text-align: center; transition: color .4s; }
+#dts .reply.new { color: var(--paper); }
+#dts .shake { animation: dts-shake .4s; }
+@keyframes dts-shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+@media (max-width: 600px) { #dts .name { font-size: 13px; letter-spacing: .42em; } #dts.ajar.peek { --open: 48px; } }
+@media (prefers-reduced-motion: reduce) { #dts *, #dts *::before, #dts *::after { transition: none !important; animation: none !important; } }
+</style>
+
+<div id="dts">
+  <div class="meta"><span>Members only</span><span><b id="dts-clock">00:00</b> · House lights down</span></div>
+
+  <div class="center">
+    <div class="door-wrap">
+      <button class="door" id="dts-door" type="button" aria-label="Knock on the door">
+        <span class="gap"></span>
+        <span class="leaf"></span>
+      </button>
+      <span class="frame" aria-hidden="true"></span>
+    </div>
+    <div class="pool">
+      <div class="light" aria-hidden="true"></div>
+      <div class="name dim" aria-hidden="true">Darkened Theater</div>
+      <h1 class="name lit" id="dts-name" aria-label="Darkened Theater Studios">Darkened Theater</h1>
+    </div>
+  </div>
+
+  <div class="knockzone">
+    <button class="knock" id="dts-knock" type="button">Knock</button>
+    <div class="reply" id="dts-reply" role="status"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* Passwords and their replies are locked. Nothing below says what they are:
+     a reply can only be unlocked by typing its password. Change them in the
+     Door Passwords editor and paste the code it gives you; don't edit by hand. */
+  // @@BEGIN DATA
+  var SALT = "f5fd480e2922fb467dc92e6dc41695cf";
+  var ITER = 150000;
+  var LOCKS = {
+    "065e860154277f21b73d70f27ab03e41f70c271c3fc65ed61e8f8e1f1bf76c09": "viQZ9jFgfgZcvEDhZ6GR1R2iI3NJvujYdKxJv4M+pdqY4lHH6ETY/xuIP+nSNZDgPsfCaw0MCqUbQMkxclkriYBixhdDVr7mbvK+0g==",
+    "07ecc670d03e14d70a54bde73b4814ccc7078561cd7aefa69afa5fbbf03bc393": "MY9aErFpnKUqs9PsMSUhvdKqX6Das8Yp1K/ES2OKWY/iMisX/9EFd4fEyiunrQp2jxyk4qpW/PRTKDMr5Cx87vwF",
+    "15c9eafcaa79b61b25ba8011101e3d06937c3398311fa545b656006db9ffd866": "iSQQtDnXKad/7kJn2mU7hdcz8LGyTOqBgh5bq+nxVrerNGsH12uURj7JFIH7qrKVNS90R1k3iKRtE+7R1FwkO7kw+l8ftDHN",
+    "1f18790678db3b5f144ad2a67b1d2cea9fc6eb936fc7ac38d86111dbd6e6b262": "N/bvhCfEkuOjzS3gRbDAnHJ0v8QW2L/IRb1hcg16JRlOMTnNvnWvzEnZGBjh8q6l0LimtnukueNkLRtOkzM=",
+    "206aae0dc58cd13a55339720838bb7f84e15a0d0d637380a6d602e0283f75f0a": "ReCXCuByp47+RY/M+CwxcMv+2X4+FhosOOKFgfakG0uOf7jWW4a95kaQ9Ywr9HG3nI536JTosZYXeGKuVzqSBLfPTR/tyw==",
+    "29acc25d402ea44509f46a1256760f1bec1f173a1175a33941e2fa32aeaf7edb": "7OmS7B2rS1b/Pv0628v4lREUPgbTZwKlBfsIs12X1SSCzI6YFNSSKI7rT1c6IX2zW9x7knbFIkDCDT80uAtITkxeSkHdjg==",
+    "364b815de4dd700c4456b6b4ab26e08cceff73746d0832792fc3267b3a7f6e57": "+raHEP+6FXmQvSv1ndbzTr2s/s4hUOqc3j7+El68Q53mSO4+upQzvw3L0FbYeBbM2+QfIB6k8w2lxYbaMA==",
+    "3a9c2992840adf0c3ffbf242af171925458a15472dd6db2099fd70299486080d": "H6J7fv0LhFS5OKQkqyP/w1srucoJnFYbDJpNuNfedlSN9OH+G+G1NZrnRP3XiVm8FD6G01fQnURBouRzMEkxYaGoLo0oS1NBKA==",
+    "41f51432506c7211450a5bdf9b3408894dc5ae8b6ceb71a1cc2af1e367257a81": "YgPdW2e6/SnxmJaaHp/RwrNOG3DSKmYmG1EVvpdoBoZ4N0hMAljlloSyzMqb7BTPhmvHiTKt1dwEIm1z639tSH63tRX9aKqW",
+    "4d57232400a86bffc1b61cab812c1242cfee67bdee38cda9e2ab6f028dc79b15": "RDre+A9n7OcDa/kQDtRzTWSEmhMwXwJYg165zqgF+X87Ncd2SispV5PoFtmojRhewOsd/BfwijC5OtjVW0IxlHR0YQ==",
+    "5489534f5aa9b630f0bdd401077614440c78d5e611209eb0c3efa30c5bf1d1ed": "Bzz4wwSkAQ+k8ZHAPH83nL5vxkFZfrxBzN8NRnWWYe/HCI/Wt1gc5wRqs9KXU39Ayl2sCS9NyeKXkIrjwKLJasuAy0SRSGrZ",
+    "594763b067c1c816a444293b548e09f16daf976daac0938c786bcb1fedeafaa9": "o4OQeIU1pK0Uk1qpB2DPjbfBN3fzhJzyDNwawSaWR5S3N/+NC5iTFt6J2OyYGI850ZBjih77gWVlFRi1+Wo=",
+    "60abbf40688bf9211d75f4c863b2070dc5a9f6182cce7315b090ecf36c36615e": "DYcI++C4W1+0UajzfPMa4T2Afws7B14ihWFiuq1jOFBwNu9I6aihQfKMN7wmJFoq8lCf92jY46hB+iBR0cEQolG1f1bqdB5y0g==",
+    "a133772ab774cd6361fe46dfc71a8f1275ae0410a0aa8900635c5fe0bff9dfbb": "Cq87FRrrFW+wsr564Pd6soQ8vlG5Dw6m9eLSt2JDTDFMNCRtzCcsZnXqvx1pIg5EJBwhlYvUf1wlep4s8js=",
+    "a49b4f0f1c2391da86d057181c870cb95eccddf3bec8552590375b63d51de914": "vl0vgRwGqdHpYNIHotZKPcpyG7e6d5e0vjRlFcZOXq3l2USKmEvqBogz4aN+ne14gEesJB4LFv3hTrHhYCigrw==",
+    "a58c62c352b0b2dc1aaafb7c998ed02a20ca863e2e5af957c6766fcaa6cc454a": "fXqkqBwfPkHZG7IyFr+XIfRTfdiMJU+D/Kf2vK3JWljrRAp1B4kYoOsoHuekmPbkzCtmvlVjShhW48hf6JDqDoc/Emqa",
+    "a80b375dd0c309707998dbc71c637e2a163cae6f4947d52e9cf7cb21fb42b74d": "6P1ep89TWKqTbzWlGnYkswQsUgYcXZgs7pHwNoli6m6HKnl0S0FTRDfeP4z0wTMHiXDl0hNIyopkXNdWGTWz745v5OarC4kDb5I/c3w=",
+    "ae4381c37794245010c9935f97fda9247843a630e76d09b11541c2f28ba464a7": "udzc+5dsuOdTgqtOMOR73FybGjSV/z9hDpDjAnAGzJf/CyAIM9AMuOF3mICgA+sPMVNUXBUfukHOHbSq3wNIdBNW",
+    "c849b97e29cc7e2eba8ef3e1666dae06126f82505f526c8e9589dc8002916210": "VCCvDhJ6N2BVubukgotcI4suJge/uWtfEvcYt8RVYn8h9lV0BbwEmsvyLTWD058hFEJWyDiI/81ELPXxPN28mHhuR1zG",
+    "cc5b3a5eb4c258704e225167b8552b0e0d40c76f157a9ba6a59ae3c30d00d8ec": "YW8QRirNFhAoIMRgKpT3BfU2fEWB9eGX/E3KUamTcVnIZY92ei0DcQ7M2+4BrJhlgo9yD/XDp8MffAv5NYtCrMW9gNz4RI8LH8UHCw==",
+    "e1a9a3e73d8869194ea0914051802650248950445bb4b26289b47a90cfb9bbbf": "bSvedvpgwwafB4XMJL8z8XvAwCH3hlN0pmpxmAR3qClMf3FeP055zjpKJK4MDcuosQK3p2LBaDP7GVoO",
+    "eb22b182d3705e1ab747d87535c07bcfdeb30c34cd89a4d68c497052f1b53fea": "DnOCwt9I7P9iqmbusaMLUjgfJ8JecUGkmvYilnfT9Tck8/V68jrLuCqHu2uvWzqXebPGkG+07A6SW3cblh6DM6Km2YrP4j6o",
+    "ec8e939342f176fd360ca3c226d744fe6e2da7a8926555a824cbf65a2e71afe6": "qr4pyU7sh/zwREMWAO7px5bGoSy9h2aWeJfZslAy2lm+wSWsHR31t1k4F8XTH1SqwhM4anDDn1LFg2PMMgY6jbvV+nEp+1Y5UHg=",
+    "fe39a44c8991a6b726c005b7a22a06917ec3559a5c5938225ac8ebfd3329353f": "xib6kPFXbAOiETNQj8ilSJ1GVKvoro/HakqDNpxtCQPyHz7qWztQfOianYyz6RMOxZHt31jApybXTdyrrOOsG3RxrG72WOi29Gcw+g=="
+  };
+  var DEFAULT_REPLIES = ["Not tonight.","Wrong door.","Who sent you?","Try again when it's darker.","We heard you the first time."];
+  // @@END DATA
+
+  var room = document.getElementById("dts");
+  if (!room) return;
+  var door = document.getElementById("dts-door");
+  var reply = document.getElementById("dts-reply");
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // unlocking: the typed word derives a key; its last half names the lock, its first half opens it
+  var subtle = window.crypto && window.crypto.subtle;
+  function norm(s) { return String(s).toUpperCase().replace(/\s+/g, ""); }
+  function hex(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ("0" + b.toString(16)).slice(-2); }).join(""); }
+  function unb64(t) { var b = atob(t), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function unhex(h) { var u = new Uint8Array(h.length / 2); for (var i = 0; i < u.length; i++) u[i] = parseInt(h.substr(i * 2, 2), 16); return u; }
+  function unlock(word) {
+    if (!subtle) return Promise.resolve(null);
+    var enc = new TextEncoder();
+    return subtle.importKey("raw", enc.encode(norm(word)), "PBKDF2", false, ["deriveBits"])
+      .then(function (base) { return subtle.deriveBits({ name: "PBKDF2", salt: unhex(SALT), iterations: ITER, hash: "SHA-256" }, base, 512); })
+      .then(function (bits) {
+        var id = hex(bits.slice(32)), box = LOCKS[id];
+        if (!box) return null;
+        var raw = unb64(box);
+        return subtle.importKey("raw", bits.slice(0, 32), "AES-GCM", false, ["decrypt"])
+          .then(function (k) { return subtle.decrypt({ name: "AES-GCM", iv: raw.slice(0, 12) }, k, raw.slice(12)); })
+          .then(function (pt) { return JSON.parse(new TextDecoder().decode(pt)); });
+      })
+      .catch(function () { return null; });
+  }
+
+  // split the lit name into letters so it can go out one at a time
+  var lit = document.getElementById("dts-name");
+  lit.innerHTML = lit.textContent.split("").map(function (c, i) { return '<span style="--i:' + i + '">' + (c === " " ? "&nbsp;" : c) + "</span>"; }).join("");
+
+  // opening: hold on black, door cracks, knock appears
+  if (reduce) room.classList.add("ajar", "titled");
+  else { setTimeout(function () { room.classList.add("ajar"); }, 600); setTimeout(function () { room.classList.add("titled"); }, 2200); }
+
+  // clock in the viewer's own time
+  var clock = document.getElementById("dts-clock");
+  function tick() { var d = new Date(); clock.textContent = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); }
+  tick(); setInterval(tick, 10000);
+
+  // the door itself is a knocker; it only moves when a password says so
+  var busy = false;
+  door.addEventListener("click", function () { if (!busy) knock(); });
+
+  // effects
+  function later(fn, ms) { setTimeout(fn, reduce ? Math.min(ms, 200) : ms); }
+  var effects = {
+    refuse: function (inp) { inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); },
+    peek: function () {
+      busy = true; room.classList.add("peek");
+      later(function () { room.classList.remove("peek"); busy = false; }, 2600);
+    },
+    slam: function () {
+      busy = true; room.classList.remove("peek"); room.classList.add("slam", "shut");
+      later(function () { room.classList.remove("slam", "shut"); busy = false; }, 1600);
+    },
+    dark: function () {
+      busy = true; room.classList.remove("peek"); room.classList.add("out");
+      later(function () { room.classList.add("shut"); }, 2000);
+      later(function () { room.classList.remove("shut", "out"); busy = false; }, 4200);
+    }
+  };
+
+  // knock -> password box
+  var n = 0;
+  function say(text) { reply.textContent = text; reply.classList.add("new"); setTimeout(function () { reply.classList.remove("new"); }, 900); }
+  function knock() {
+    var k = document.getElementById("dts-knock");
+    if (!k) { document.getElementById("dts-code").focus(); return; }
+    var inp = document.createElement("input");
+    inp.className = "code"; inp.id = "dts-code"; inp.placeholder = "Password"; inp.maxLength = 20;
+    inp.setAttribute("aria-label", "Password"); inp.autocomplete = "off"; inp.spellcheck = false;
+    inp.setAttribute("autocapitalize", "characters");
+    k.parentNode.replaceChild(inp, k);
+    inp.focus();
+    var checking = false;
+    inp.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" || !inp.value.trim() || busy || checking) return;
+      var word = inp.value;
+      inp.value = ""; checking = true;
+      unlock(word).then(function (hit) {
+        checking = false;
+        if (hit) { say(hit.say); (effects[hit.do] || effects.refuse)(inp); }
+        else { say(DEFAULT_REPLIES[n++ % DEFAULT_REPLIES.length]); effects.refuse(inp); }
+      });
+    });
+  }
+  document.getElementById("dts-knock").addEventListener("click", knock);
+})();
+</script>
+</body>
+</html>
